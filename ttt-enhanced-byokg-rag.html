@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TTT-Enhanced BYOKG-RAG System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .architecture {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .code-section {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .feature {
+            background: #e8f4f8;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 TTT-Enhanced BYOKG-RAG System</h1>
+        
+        <div class="architecture">
+            <h2>📐 Architecture Overview</h2>
+            <p>This enhanced system integrates Test-Time Training (TTT) with your existing BYOKG-RAG framework to improve BOQ generation accuracy through adaptive learning at inference time.</p>
+            
+            <h3>Key Enhancements:</h3>
+            <ul>
+                <li><strong>Test-Time Adaptation:</strong> Fine-tunes the model on query-specific examples during inference</li>
+                <li><strong>Leave-One-Out Training:</strong> Creates synthetic training tasks from your provided examples</li>
+                <li><strong>LoRA Adapters:</strong> Efficient parameter updates without modifying the base model</li>
+                <li><strong>Multi-Strategy Retrieval:</strong> Enhanced graph traversal with TTT-informed ranking</li>
+                <li><strong>Iterative Refinement:</strong> Improved orchestration with TTT feedback loops</li>
+            </ul>
+        </div>
+
+        <div class="feature">
+            <h2>🔄 TTT Integration Flow</h2>
+            <ol>
+                <li><strong>Query Analysis:</strong> Enhanced KG-Linker with TTT-adapted entity recognition</li>
+                <li><strong>Example Collection:</strong> System requests 10 relevant examples from user</li>
+                <li><strong>TTT Training:</strong> Creates leave-one-out tasks and fine-tunes adapters</li>
+                <li><strong>Enhanced Retrieval:</strong> Uses adapted model for better graph queries</li>
+                <li><strong>BOQ Generation:</strong> Produces more accurate bills with TTT-informed decisions</li>
+            </ol>
+        </div>
+
+        <div class="code-section">
+            <h3>📁 Project Structure</h3>
+            <pre>
+ttt-enhanced-byokg-rag/
+├── src/
+│   ├── core/
+│   │   ├── kg_linker.py          # Enhanced with TTT
+│   │   ├── graph_retriever.py    # Multi-strategy retrieval
+│   │   ├── orchestrator.py       # TTT-aware orchestration
+│   │   └── ttt_adapter.py        # NEW: TTT implementation
+│   ├── ingestion/
+│   │   ├── pdf_parser.py         # Document processing
+│   │   ├── knowledge_extractor.py # LLM-based extraction
+│   │   └── graph_loader.py       # Neo4j bulk loading
+│   ├── api/
+│   │   ├── main.py               # FastAPI application
+│   │   ├── endpoints.py          # API routes
+│   │   └── models.py             # Pydantic models
+│   └── utils/
+│       ├── s3_manager.py         # AWS S3 operations
+│       ├── neo4j_client.py       # Graph database client
+│       └── config.py             # Configuration management
+├── scripts/
+│   ├── run_ingestion.py          # Data pipeline runner
+│   ├── run_api.py                # API server launcher
+│   └── collect_examples.py       # NEW: Example collection
+├── data/
+│   ├── examples/                 # TTT training examples
+│   ├── adapters/                 # Saved LoRA weights
+│   └── cache/                    # Query cache
+├── tests/
+│   └── test_ttt_integration.py   # TTT test suite
+├── docker-compose.yml            # Container orchestration
+├── requirements.txt              # Python dependencies
+└── .env.example                  # Environment template
+            </pre>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Implementation Notes</h3>
+            <ul>
+                <li>The system will prompt you for 10 example BOQs during first run</li>
+                <li>AWS S3 credentials and API keys will be requested during setup</li>
+                <li>LoRA adapters are cached for efficiency (configurable)</li>
+                <li>Requires GPU for optimal TTT performance (CPU fallback available)</li>
+            </ul>
+        </div>
+
+        <div class="feature">
+            <h2>🎯 Key Features</h2>
+            <ul>
+                <li><strong>Adaptive Learning:</strong> Model improves with each query through TTT</li>
+                <li><strong>Microservices Architecture:</strong> Clean separation of concerns</li>
+                <li><strong>Scalable Design:</strong> Supports distributed training and inference</li>
+                <li><strong>Production Ready:</strong> Docker support with health checks and monitoring</li>
+                <li><strong>Extensible Framework:</strong> Easy to add new adapters and strategies</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
