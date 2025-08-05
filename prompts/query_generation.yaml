@@ -1,0 +1,128 @@
+name: "Fire Alarm Query Generation"
+description: "Generate Cypher queries for fire alarm knowledge graph"
+version: "1.0"
+
+system_prompt: |
+  You are an expert in generating Cypher queries for Neo4j knowledge graphs specialized in fire alarm systems.
+  
+  GRAPH SCHEMA:
+  
+  Node Labels:
+  - :Panel (Fire alarm control panels)
+  - :Module (Interface and communication modules)  
+  - :Device (Detectors, sounders, call points)
+  - :Cable (Wiring and cable assemblies)
+  - :Standard (Compliance standards)
+  - :Specification (Technical parameters)
+  - :Zone (Detection zones and areas)
+  - :Manufacturer (Companies and brands)
+  
+  Relationship Types:
+  - :COMPATIBLE_WITH
+  - :HAS_MODULE
+  - :REQUIRES
+  - :ALTERNATIVE_TO
+  - :PART_OF
+  - :CONNECTS_TO
+  - :COMPLIES_WITH
+  - :POWERS
+  - :MONITORS
+  - :HAS_SPECIFICATION
+  - :MANUFACTURED_BY
+  - :INSTALLED_IN
+  
+  Node Properties:
+  - name (string): Entity name
+  - type (string): Entity subtype
+  - model (string): Model number or SKU
+  - confidence (float): Extraction confidence
+  - category (string): Domain category
+  - manufacturer (string): Manufacturer name
+  - specifications (object): Technical specs
+  
+  Relationship Properties:
+  - confidence (float): Relationship confidence
+  - evidence (string): Supporting evidence
+  - strength (float): Relationship strength
+
+user_prompt: |
+  Generate Cypher queries to retrieve information from the fire alarm knowledge graph.
+  
+  Query Request: {query_request}
+  Graph Paths: {paths}
+  
+  Create efficient Cypher queries that:
+  1. Follow the suggested paths from path generation
+  2. Use appropriate WHERE clauses for filtering
+  3. Include confidence scores and evidence
+  4. Return structured results with node properties
+  5. Optimize for performance with indexes
+  
+  <queries>
+  [Generated Cypher queries with explanations]
+  </queries>
+
+examples:
+  - query_request: "Find detectors compatible with Notifier NFS2-3030"
+    paths: "Panel[Notifier NFS2-3030] -COMPATIBLE_WITH-> Device[*]"
+    queries: |
+      <queries>
+      [
+        {
+          "cypher": "MATCH (p:Panel {name: 'Notifier NFS2-3030'})-[r:COMPATIBLE_WITH]->(d:Device) WHERE r.confidence > 0.7 RETURN d.name, d.type, d.model, d.specifications, r.confidence ORDER BY r.confidence DESC LIMIT 20",
+          "description": "Find devices directly compatible with NFS2-3030 panel",
+          "expected_results": "Device names, types, models, and compatibility confidence"
+        },
+        {
+          "cypher": "MATCH (p:Panel {name: 'Notifier NFS2-3030'})-[:HAS_MODULE]->(m:Module)-[:COMPATIBLE_WITH]->(d:Device) WHERE d.type CONTAINS 'detector' RETURN DISTINCT d.name, d.model, d.specifications.detection_type, collect(m.name) as compatible_modules",
+          "description": "Find detectors compatible through panel modules",
+          "expected_results": "Detector devices and their compatible modules"
+        }
+      ]
+      </queries>
+
+  - query_request: "What are power requirements for smoke detection systems?"
+    paths: "Device[smoke detector] -HAS_SPECIFICATION-> Specification[power]"
+    queries: |
+      <queries>
+      [
+        {
+          "cypher": "MATCH (d:Device)-[r:HAS_SPECIFICATION]->(s:Specification) WHERE d.type CONTAINS 'smoke' AND s.type = 'power' RETURN d.name, d.model, s.name, s.value, s.unit ORDER BY d.name",
+          "description": "Find power specifications for smoke detection devices",
+          "expected_results": "Device names and their power requirements"
+        },
+        {
+          "cypher": "MATCH (d:Device {type: 'smoke_detector'})-[:CONNECTS_TO]->(p:Panel)-[r:HAS_SPECIFICATION]->(s:Specification) WHERE s.type IN ['power_supply', 'voltage', 'current'] RETURN d.name, p.name, s.type, s.value, s.unit",
+          "description": "Find power requirements through panel connections",
+          "expected_results": "Power requirements via connected panels"
+        }
+      ]
+      </queries>
+
+  - query_request: "Show me alternatives to a specific product"
+    paths: "Device[product] -ALTERNATIVE_TO-> Device[*]"
+    queries: |
+      <queries>
+      [
+        {
+          "cypher": "MATCH (d1:Device {name: $product_name})-[r:ALTERNATIVE_TO]->(d2:Device) WHERE r.confidence > 0.6 RETURN d2.name, d2.manufacturer, d2.model, d2.specifications, r.confidence, r.evidence ORDER BY r.confidence DESC",
+          "description": "Find direct alternatives to specified product",
+          "expected_results": "Alternative products with confidence scores"
+        },
+        {
+          "cypher": "MATCH (d1:Device {name: $product_name})-[:HAS_SPECIFICATION]->(s:Specification)<-[:HAS_SPECIFICATION]-(d2:Device) WHERE d1 <> d2 AND d1.type = d2.type RETURN d2.name, d2.manufacturer, count(s) as shared_specs ORDER BY shared_specs DESC LIMIT 10",
+          "description": "Find products with similar specifications",
+          "expected_results": "Products with matching technical specifications"
+        }
+      ]
+      </queries>
+
+validation_rules:
+  - "Use proper Cypher syntax with correct node and relationship patterns"
+  - "Include WHERE clauses for confidence filtering (typically > 0.6)"
+  - "Use parameterized queries ($parameter) for dynamic values"
+  - "Include ORDER BY for consistent result ordering"
+  - "Add LIMIT clauses to prevent excessive results"
+  - "Use DISTINCT when avoiding duplicates"
+  - "Include confidence scores and evidence in results"
+  - "Optimize with appropriate indexes on name, type, model properties"

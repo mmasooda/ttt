@@ -1,0 +1,126 @@
+name: "Fire Alarm Path Generation"
+description: "Generate knowledge graph paths for fire alarm system queries"
+version: "1.0"
+
+system_prompt: |
+  You are an expert knowledge graph navigator for fire alarm systems. Generate relevant paths through the knowledge graph to answer user queries.
+  
+  FIRE ALARM KNOWLEDGE GRAPH SCHEMA:
+  
+  Node Types:
+  - Panel: Fire alarm control panels and main units
+  - Module: Interface modules, input/output modules, communication modules
+  - Device: Detectors, sounders, call points, notification devices
+  - Cable: Wiring, connectors, and cable assemblies
+  - Standard: Compliance standards and regulations
+  - Specification: Technical parameters and requirements
+  - Zone: Detection zones and system areas
+  - Manufacturer: Company and brand information
+  
+  Relationship Types:
+  - COMPATIBLE_WITH: Products that can work together
+  - HAS_MODULE: Panels that contain specific modules
+  - REQUIRES: Dependencies between components
+  - ALTERNATIVE_TO: Products that can substitute for each other
+  - PART_OF: Components belonging to larger assemblies
+  - CONNECTS_TO: Physical or logical connections
+  - COMPLIES_WITH: Standards compliance relationships
+  - POWERS: Power supply relationships
+  - MONITORS: Monitoring and supervision relationships
+  - HAS_SPECIFICATION: Technical specification relationships
+  - MANUFACTURED_BY: Product manufacturer relationships
+  - INSTALLED_IN: Location and zone relationships
+
+user_prompt: |
+  Given this user query about fire alarm systems, generate relevant paths through the knowledge graph that would help answer the question.
+  
+  User Query: {query}
+  
+  Consider paths that explore:
+  1. Product compatibility and requirements
+  2. Standards compliance and regulations  
+  3. Technical specifications and capabilities
+  4. System architecture and connections
+  5. Installation and configuration requirements
+  6. Alternative products and solutions
+  
+  Generate paths of 2-4 hops that are most likely to contain relevant information.
+  
+  <paths>
+  [List of graph traversal paths]
+  </paths>
+
+examples:
+  - query: "What detectors are compatible with the Notifier NFS2-3030 panel?"
+    paths: |
+      <paths>
+      [
+        {
+          "path": "Panel[Notifier NFS2-3030] -COMPATIBLE_WITH-> Device[*] -HAS_SPECIFICATION-> Specification[*]",
+          "description": "Find devices compatible with NFS2-3030 and their specifications",
+          "priority": 1
+        },
+        {
+          "path": "Panel[Notifier NFS2-3030] -HAS_MODULE-> Module[*] -COMPATIBLE_WITH-> Device[*]",
+          "description": "Find devices compatible through panel modules",
+          "priority": 2
+        },
+        {
+          "path": "Panel[Notifier NFS2-3030] -MANUFACTURED_BY-> Manufacturer[*] -PRODUCES-> Device[*]",
+          "description": "Find devices from same manufacturer",
+          "priority": 3
+        }
+      ]
+      </paths>
+
+  - query: "What are the power requirements for a smoke detection system?"
+    paths: |
+      <paths>
+      [
+        {
+          "path": "Device[smoke detector] -HAS_SPECIFICATION-> Specification[power] -REQUIRES-> Specification[voltage]",
+          "description": "Find power specifications for smoke detectors",
+          "priority": 1
+        },
+        {
+          "path": "Device[smoke detector] -CONNECTS_TO-> Panel[*] -HAS_SPECIFICATION-> Specification[power supply]",
+          "description": "Find power supply requirements through panel connections",
+          "priority": 2
+        },
+        {
+          "path": "Device[smoke detector] -REQUIRES-> Cable[*] -HAS_SPECIFICATION-> Specification[power rating]",
+          "description": "Find power requirements through cable specifications",
+          "priority": 3
+        }
+      ]
+      </paths>
+
+  - query: "Which standards does the Hochiki ESP panel comply with?"
+    paths: |
+      <paths>
+      [
+        {
+          "path": "Panel[Hochiki ESP] -COMPLIES_WITH-> Standard[*]",
+          "description": "Direct compliance relationships",
+          "priority": 1
+        },
+        {
+          "path": "Panel[Hochiki ESP] -HAS_MODULE-> Module[*] -COMPLIES_WITH-> Standard[*]",
+          "description": "Standards compliance through modules",
+          "priority": 2
+        },
+        {
+          "path": "Panel[Hochiki ESP] -MANUFACTURED_BY-> Manufacturer[Hochiki] -COMPLIES_WITH-> Standard[*]",
+          "description": "Manufacturer-level standards compliance",
+          "priority": 3
+        }
+      ]
+      </paths>
+
+validation_rules:
+  - "Paths must use valid node and relationship types from the schema"
+  - "Include path description explaining the reasoning"
+  - "Assign priority based on relevance to the query"
+  - "Use wildcards (*) for open-ended searches"
+  - "Focus on fire alarm domain relationships"
+  - "Paths should be 2-4 hops for optimal performance"

@@ -1,0 +1,107 @@
+name: "Fire Alarm Entity Extraction"
+description: "Extract entities from fire alarm system documents"
+version: "1.0"
+
+system_prompt: |
+  You are an expert in fire alarm system documentation analysis. Extract relevant entities and their relationships from technical documents.
+  
+  FIRE ALARM DOMAIN ENTITIES:
+  
+  Products & Components:
+  - Fire alarm control panels (e.g., "Notifier NFS2-3030", "Hochiki ESP-50")
+  - Detection devices (smoke detectors, heat detectors, flame detectors)
+  - Notification devices (sounders, beacons, strobes, speakers)
+  - Manual call points and break glass units
+  - Interface modules and input/output modules
+  - Power supplies, batteries, and chargers
+  - Cables and wiring (fire resistant cables, screened cables)
+  - Mounting hardware and enclosures
+  
+  Standards & Regulations:
+  - British Standards: BS 5839-1, BS 5839-6, BS EN 54 series
+  - European Standards: EN 54-2, EN 54-4, EN 54-10, EN 54-13
+  - International: NFPA 72, ISO 7240, IEC 60849
+  - Building regulations and local codes
+  
+  Technical Specifications:
+  - Electrical: voltage (12V, 24V), current ratings, power consumption
+  - Environmental: IP ratings (IP65, IP54), temperature ranges
+  - Performance: sensitivity levels, response times, coverage areas
+  - Communication: protocol types, loop configurations
+  
+  System Architecture:
+  - Detection zones and areas
+  - Loop configurations and topology
+  - Network architecture and interfaces
+  - Integration points with other systems
+
+user_prompt: |
+  Extract entities from this fire alarm system document. Focus on:
+  
+  1. Product names, model numbers, and SKUs
+  2. Technical specifications and ratings
+  3. Standards and compliance requirements
+  4. System components and their relationships
+  5. Quantities and measurements
+  6. Installation and configuration details
+  
+  Document content:
+  {content}
+  
+  Respond with structured data using these tags:
+  
+  <entities>
+  [List of entities with name, type, confidence, and context]
+  </entities>
+  
+  <relationships>
+  [List of relationships between entities]
+  </relationships>
+
+examples:
+  - input: "The Notifier NFS2-3030 fire alarm control panel supports up to 318 devices per loop and complies with BS EN 54-2 and BS EN 54-4 standards."
+    output: |
+      <entities>
+      [
+        {"name": "Notifier NFS2-3030", "type": "control_panel", "confidence": 0.95, "context": "fire alarm control panel"},
+        {"name": "318 devices per loop", "type": "specification", "confidence": 0.9, "context": "supports up to 318 devices per loop"},
+        {"name": "BS EN 54-2", "type": "standard", "confidence": 0.95, "context": "complies with BS EN 54-2"},
+        {"name": "BS EN 54-4", "type": "standard", "confidence": 0.95, "context": "complies with BS EN 54-4"}
+      ]
+      </entities>
+      
+      <relationships>
+      [
+        {"source": "Notifier NFS2-3030", "target": "BS EN 54-2", "type": "COMPLIES_WITH", "confidence": 0.9},
+        {"source": "Notifier NFS2-3030", "target": "BS EN 54-4", "type": "COMPLIES_WITH", "confidence": 0.9},
+        {"source": "Notifier NFS2-3030", "target": "318 devices per loop", "type": "HAS_SPECIFICATION", "confidence": 0.85}
+      ]
+      </relationships>
+
+  - input: "Each smoke detector requires a base and connects to the fire alarm loop using screened cable. The detector is compatible with all Hochiki ESP series panels."
+    output: |
+      <entities>
+      [
+        {"name": "smoke detector", "type": "detection_device", "confidence": 0.9, "context": "Each smoke detector requires a base"},
+        {"name": "base", "type": "component", "confidence": 0.85, "context": "detector requires a base"},
+        {"name": "fire alarm loop", "type": "system_component", "confidence": 0.9, "context": "connects to the fire alarm loop"},
+        {"name": "screened cable", "type": "cable", "confidence": 0.9, "context": "using screened cable"},
+        {"name": "Hochiki ESP series panels", "type": "control_panel", "confidence": 0.95, "context": "compatible with all Hochiki ESP series panels"}
+      ]
+      </entities>
+      
+      <relationships>
+      [
+        {"source": "smoke detector", "target": "base", "type": "REQUIRES", "confidence": 0.9},
+        {"source": "smoke detector", "target": "fire alarm loop", "type": "CONNECTS_TO", "confidence": 0.85},
+        {"source": "smoke detector", "target": "screened cable", "type": "REQUIRES", "confidence": 0.8},
+        {"source": "smoke detector", "target": "Hochiki ESP series panels", "type": "COMPATIBLE_WITH", "confidence": 0.9}
+      ]
+      </relationships>
+
+validation_rules:
+  - "All entities must have name, type, confidence (0.0-1.0), and context"
+  - "Relationships must have source, target, type, and confidence"
+  - "Confidence scores should reflect extraction certainty"
+  - "Context should provide supporting evidence for entity extraction"
+  - "Focus on fire alarm domain-specific entities and relationships"

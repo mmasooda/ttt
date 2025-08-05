@@ -1,0 +1,201 @@
+name: "Fire Alarm Answer Generation"
+description: "Generate comprehensive answers using GPT-4o for fire alarm queries"
+version: "1.0"
+
+system_prompt: |
+  You are an expert fire alarm system consultant and technical advisor. Generate comprehensive, accurate answers based on knowledge graph data and document context.
+  
+  EXPERTISE AREAS:
+  - Fire alarm system design and specification
+  - Product selection and compatibility analysis
+  - Standards compliance (BS 5839, EN 54, NFPA 72)
+  - Installation and commissioning guidance
+  - Troubleshooting and maintenance procedures
+  - Cost optimization and alternative solutions
+  
+  RESPONSE GUIDELINES:
+  1. Be technically accurate and specific
+  2. Reference relevant standards and regulations
+  3. Include product model numbers and specifications
+  4. Provide practical implementation guidance
+  5. Explain compatibility and integration requirements
+  6. Suggest alternatives when appropriate
+  7. Include safety and compliance considerations
+  8. Structure responses with clear headings and bullet points
+  
+  SOURCES TO REFERENCE:
+  - Knowledge graph entities and relationships
+  - Document excerpts and technical specifications
+  - Vector similarity search results
+  - Standards and regulatory requirements
+
+user_prompt: |
+  User Query: {query}
+  
+  Available Context:
+  
+  KNOWLEDGE GRAPH DATA:
+  {graph_context}
+  
+  DOCUMENT EXCERPTS:
+  {document_excerpts}
+  
+  VECTOR SEARCH RESULTS:
+  {vector_results}
+  
+  Generate a comprehensive answer that:
+  1. Directly addresses the user's question
+  2. Uses specific information from the provided context
+  3. References relevant product models and specifications
+  4. Includes applicable standards and compliance requirements
+  5. Provides actionable recommendations
+  6. Explains technical concepts clearly
+  7. Suggests next steps or additional considerations
+  
+  Structure your response with appropriate headings and format for readability.
+
+examples:
+  - query: "What detectors are compatible with the Notifier NFS2-3030 panel?"
+    context: "Graph shows COMPATIBLE_WITH relationships between NFS2-3030 and various detector models"
+    response: |
+      # Compatible Detectors for Notifier NFS2-3030 Panel
+      
+      ## Direct Compatibility
+      
+      Based on the knowledge graph analysis, the following detectors are directly compatible with the Notifier NFS2-3030 fire alarm control panel:
+      
+      ### Smoke Detectors
+      - **Notifier FSP-851**: Intelligent photoelectric smoke detector
+        - Voltage: 15-32V DC
+        - Current: 300μA standby, 45mA alarm
+        - Compliance: BS EN 54-7, FM approved
+      
+      - **System Sensor 2451**: Photoelectric smoke detector
+        - Compatible through Notifier protocol
+        - Loop powered operation
+        - Drift compensation technology
+      
+      ### Heat Detectors  
+      - **Notifier FST-851**: Intelligent thermal detector
+        - Fixed temperature and rate-of-rise detection
+        - Operating range: -10°C to +50°C
+        - Compatible with all NFS2 series panels
+      
+      ## Compatibility Requirements
+      
+      ### Protocol Compatibility
+      The NFS2-3030 uses Notifier's FlashScan® protocol, which requires:
+      - Devices must support FlashScan communication
+      - Maximum loop length: 3000m (depending on cable type)
+      - Maximum 159 devices per loop (318 total for dual-loop configuration)
+      
+      ### Power Requirements
+      - Loop voltage: 15-32V DC
+      - Total loop current budget: 300mA
+      - Individual device current draw varies by model
+      
+      ## Standards Compliance
+      All compatible detectors must comply with:
+      - **BS EN 54-7** (Smoke detectors)
+      - **BS EN 54-5** (Heat detectors) 
+      - **BS 5839-1** (System design and installation)
+      
+      ## Installation Considerations
+      - Use screened cable for loop wiring
+      - Install devices according to BS 5839-1 spacing requirements
+      - Program device addresses using panel configuration software
+      - Test all devices after installation per manufacturer guidelines
+
+  - query: "What are the power requirements for a smoke detection system?"
+    response: |
+      # Power Requirements for Smoke Detection Systems
+      
+      ## System Power Architecture
+      
+      ### Control Panel Power Supply
+      Fire alarm control panels typically require:
+      - **Primary Supply**: 230V AC mains power
+      - **Secondary Supply**: 24V DC battery backup
+      - **Standby Duration**: Minimum 24 hours (BS 5839-1)
+      - **Alarm Duration**: Additional 30 minutes at full load
+      
+      ### Device Power Requirements
+      
+      #### Individual Smoke Detectors
+      Based on knowledge graph data for common detector types:
+      
+      **Photoelectric Smoke Detectors:**
+      - Standby current: 30-50μA typical
+      - Alarm current: 8-15mA typical
+      - Operating voltage: 9-30V DC (varies by model)
+      
+      **Ionization Smoke Detectors:**
+      - Standby current: 8-12μA typical  
+      - Alarm current: 10-20mA typical
+      - Operating voltage: 9-30V DC
+      
+      **Aspirating Smoke Detection:**
+      - Power consumption: 40-120W per unit
+      - Requires dedicated 230V AC supply
+      - Battery backup recommended for critical applications
+      
+      ## Power Calculation Example
+      
+      ### System Sizing Calculation
+      For a typical 100-detector system:
+      
+      ```
+      Standby Load:
+      - 100 detectors × 40μA = 4mA
+      - Control panel = 200mA
+      - Sounders/beacons = 10mA
+      - Total standby = 214mA
+      
+      Alarm Load:
+      - 100 detectors × 12mA = 1200mA
+      - Control panel = 300mA  
+      - Sounders/beacons = 2000mA
+      - Total alarm = 3500mA (3.5A)
+      ```
+      
+      ### Battery Sizing
+      Required battery capacity:
+      ```
+      Standby: 214mA × 24h = 5.1Ah
+      Alarm: 3500mA × 0.5h = 1.75Ah
+      Total minimum: 6.85Ah
+      Recommended: 12Ah (with 75% derating)
+      ```
+      
+      ## Standards Requirements
+      
+      ### BS 5839-1 Requirements
+      - **Standby period**: 24 hours minimum
+      - **Alarm period**: 30 minutes minimum
+      - **Battery type**: Valve-regulated lead-acid preferred
+      - **Charging**: Automatic with current limiting
+      
+      ### Power Supply Monitoring
+      Required monitoring per BS EN 54-4:
+      - Mains failure detection
+      - Low battery voltage alarm
+      - Battery disconnection fault
+      - Excessive battery current fault
+      
+      ## Recommendations
+      
+      1. **Over-specify power supplies** by 25% minimum
+      2. **Use quality battery chargers** with temperature compensation  
+      3. **Regular maintenance** - test batteries annually
+      4. **Consider UPS systems** for critical applications
+      5. **Document power calculations** for compliance records
+
+validation_rules:
+  - "Reference specific products and model numbers from context"
+  - "Include relevant standards (BS 5839, EN 54, NFPA 72)"
+  - "Provide technical specifications and measurements"
+  - "Structure with clear headings and bullet points"
+  - "Include practical implementation guidance"
+  - "Explain technical concepts for non-experts"
+  - "Suggest next steps and additional considerations"
+  - "Base all claims on provided context data"

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTT-Enhanced BYOKG-RAG Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            margin-top: 5px;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.processing {
+            background: #ffc107;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .progress-container {
+            flex: 1;
+            max-width: 300px;
+            margin: 0 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #6c757d;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message.assistant {
+            align-items: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-info {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+            padding: 0 10px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 16px;
+        }
+
+        .system-info, .processing-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-label {
+            color: #6c757d;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e9ecef;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .welcome-message h3 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .sample-queries {
+            margin-top: 20px;
+        }
+
+        .sample-query {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .sample-query:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+            
+            .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 TTT-Enhanced BYOKG-RAG System</h1>
+            <div class="subtitle">Fire Alarm Systems Knowledge Assistant</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-left">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Checking system status...</span>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="progressText">Initializing...</div>
+            </div>
+            
+            <div id="estimatedTime">Calculating...</div>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        <h3>👋 Welcome to the TTT-Enhanced BYOKG-RAG System</h3>
+                        <p>Ask questions about fire alarm systems, specifications, compliance standards, and more!</p>
+                        
+                        <div class="sample-queries">
+                            <div class="sample-query" onclick="askSampleQuery('What fire alarm panels are available in the system?')">
+                                🔥 What fire alarm panels are available in the system?
+                            </div>
+                            <div class="sample-query" onclick="askSampleQuery('What are the power requirements for smoke detectors?')">
+                                ⚡ What are the power requirements for smoke detectors?
+                            </div>
+                            <div class="sample-query" onclick="askSampleQuery('Which standards do fire alarm systems need to comply with?')">
+                                📋 Which standards do fire alarm systems need to comply with?
+                            </div>
+                            <div class="sample-query" onclick="askSampleQuery('Show me compatible devices for a specific panel')">
+                                🔗 Show me compatible devices for a specific panel
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <form class="chat-input-form" id="chatForm">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Ask about fire alarm systems..." autocomplete="off">
+                        <button type="submit" id="sendButton" class="send-button">Send</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <h3>📊 System Status</h3>
+                <div class="processing-info" id="processingInfo">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading status...
+                    </div>
+                </div>
+
+                <h3>ℹ️ System Information</h3>
+                <div class="system-info" id="systemInfo">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading info...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isProcessing = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus();
+            loadSystemInfo();
+            setInterval(updateStatus, 5000); // Update every 5 seconds
+        });
+
+        // Chat form submission
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            
+            if (!query) return;
+            
+            input.value = '';
+            await sendQuery(query);
+        });
+
+        function askSampleQuery(query) {
+            document.getElementById('chatInput').value = query;
+            sendQuery(query);
+        }
+
+        async function sendQuery(query) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const sendButton = document.getElementById('sendButton');
+            
+            // Add user message
+            addMessage('user', query);
+            
+            // Add loading message
+            const loadingId = Date.now();
+            addMessage('assistant', '<div class="loading"><div class="spinner"></div>Processing your query...</div>', loadingId);
+            
+            sendButton.disabled = true;
+            
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const result = await response.json();
+                
+                // Remove loading message
+                removeMessage(loadingId);
+                
+                if (response.ok) {
+                    let answerHtml = formatAnswer(result.answer);
+                    
+                    // Add metadata
+                    if (result.sources && result.sources.length > 0) {
+                        answerHtml += `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+                            📚 Sources: ${result.sources.length} documents | 
+                            📊 Graph results: ${result.graph_results} | 
+                            🔍 Vector results: ${result.vector_results}
+                        </div>`;
+                    }
+                    
+                    addMessage('assistant', answerHtml);
+                } else {
+                    addMessage('assistant', `❌ Error: ${result.error}`);
+                }
+            } catch (error) {
+                removeMessage(loadingId);
+                addMessage('assistant', `❌ Network error: ${error.message}`);
+            }
+            
+            sendButton.disabled = false;
+        }
+
+        function addMessage(type, content, id = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            if (id) messageDiv.id = `message-${id}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${content}</div>
+                <div class="message-info">${timestamp}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeMessage(id) {
+            const message = document.getElementById(`message-${id}`);
+            if (message) message.remove();
+        }
+
+        function formatAnswer(answer) {
+            // Convert markdown-style formatting to HTML
+            return answer
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/^(.*)$/, '<p>$1</p>');
+        }
+
+        async function updateStatus() {
+            try {
+                const response = await fetch('/status');
+                const status = await response.json();
+                
+                // Update status indicator
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                
+                if (status.is_processing) {
+                    statusDot.className = 'status-dot processing';
+                    statusText.textContent = 'Processing S3 data...';
+                } else {
+                    statusDot.className = 'status-dot';
+                    statusText.textContent = 'System ready';
+                }
+                
+                // Update progress bar
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                const estimatedTime = document.getElementById('estimatedTime');
+                
+                progressFill.style.width = `${status.progress_percent}%`;
+                progressText.textContent = `${status.files_processed}/${status.total_files} files (${status.progress_percent}%)`;
+                estimatedTime.textContent = status.estimated_remaining;
+                
+                // Update processing info
+                updateProcessingInfo(status);
+                
+            } catch (error) {
+                console.error('Failed to update status:', error);
+            }
+        }
+
+        function updateProcessingInfo(status) {
+            const processingInfo = document.getElementById('processingInfo');
+            
+            processingInfo.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value">${status.is_processing ? 'Processing' : 'Ready'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Progress:</span>
+                    <span class="info-value">${status.files_processed}/${status.total_files}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Elapsed:</span>
+                    <span class="info-value">${status.elapsed_time}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Remaining:</span>
+                    <span class="info-value">${status.estimated_remaining}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Current:</span>
+                    <span class="info-value" style="font-size: 12px;">${status.current_file}</span>
+                </div>
+            `;
+        }
+
+        async function loadSystemInfo() {
+            try {
+                const response = await fetch('/system-info');
+                const info = await response.json();
+                
+                const systemInfo = document.getElementById('systemInfo');
+                systemInfo.innerHTML = `
+                    <div class="info-item">
+                        <span class="info-label">System:</span>
+                        <span class="info-value">${info.system_name}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Version:</span>
+                        <span class="info-value">${info.version}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ingestion:</span>
+                        <span class="info-value">${info.models.ingestion}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Generation:</span>
+                        <span class="info-value">${info.models.generation}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Embeddings:</span>
+                        <span class="info-value">${info.models.embeddings}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">S3 Bucket:</span>
+                        <span class="info-value">${info.s3_bucket}</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load system info:', error);
+            }
+        }
+    </script>
+</body>
+</html>
